@@ -22,7 +22,7 @@ fn main() {
     let config = Config::from_config_file(CONFIG_FILE_PATH);
     println!("Config loaded: {:?}", config);
 
-    let initial_image = ImageBuffer::from_pixel(config.size, config.size, image::Rgba([0u8, 0u8, 0u8, 255u8]));
+    let initial_image = ImageBuffer::from_pixel(config.width, config.height, image::Rgba([0u8, 0u8, 0u8, 255u8]));
 
     let (width, height) = initial_image.dimensions();
     println!("Created image with dimensions {:?}x{:?}", width, height);

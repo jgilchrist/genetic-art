@@ -8,7 +8,9 @@ use toml;
 
 #[derive(Debug)]
 pub struct Config {
-    pub size: u32,
+    pub width: u32,
+    pub height: u32,
+    pub alpha: u8,
 }
 
 impl Config {
@@ -26,14 +28,18 @@ impl Config {
 
         let toml_value = toml::Parser::new(&file_contents).parse().unwrap();
 
-        let size = Config::get_int(toml_value, "size");
+        let width = Config::get_int(&toml_value, "width");
+        let height = Config::get_int(&toml_value, "height");
+        let alpha = Config::get_int(&toml_value, "alpha") as u8;
 
         Config {
-            size
+            width,
+            height,
+            alpha,
         }
     }
 
-    fn get_int(toml_value: BTreeMap<String, toml::Value>, parameter: &'static str) -> u32 {
+    fn get_int(toml_value: &BTreeMap<String, toml::Value>, parameter: &'static str) -> u32 {
         toml_value.get(parameter)
             .expect(&format!("{} configuration not specified", parameter))
             .as_integer()
