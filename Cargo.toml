@@ -1,0 +1,6 @@
+[package]
+name = "genetic-art"
+version = "0.1.0"
+authors = ["Jonny Gilchrist <jonnygilchrist@gmail.com>"]
+
+[dependencies]
