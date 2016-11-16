@@ -6,3 +6,4 @@ authors = ["Jonny Gilchrist <jonnygilchrist@gmail.com>"]
 [dependencies]
 image = "0.10.3"
 toml = "0.2.1"
+rand = "0.3.14"

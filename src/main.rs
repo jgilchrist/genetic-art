@@ -2,6 +2,7 @@
 
 extern crate image;
 extern crate toml;
+extern crate rand;
 
 mod config;
 mod shapes;
@@ -25,6 +26,9 @@ fn main() {
 
     let (width, height) = initial_image.dimensions();
     println!("Created image with dimensions {:?}x{:?}", width, height);
+
+    let triangle = drawing::random_triangle(255);
+    println!("Created a random triangle: {:?}", triangle);
 
     let _ = initial_image.save("generated/test.png").unwrap();
 }
