@@ -17,8 +17,6 @@ type Image = ImageBuffer<Rgba<u8>, Vec<u8>>;
 const CONFIG_FILE_PATH: &'static str = "Config.toml";
 
 fn main() {
-    println!("Starting...");
-
     let config = Config::from_config_file(CONFIG_FILE_PATH);
     println!("Config loaded: {:?}", config);
 
