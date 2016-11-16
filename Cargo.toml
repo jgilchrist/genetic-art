@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["Jonny Gilchrist <jonnygilchrist@gmail.com>"]
 
 [dependencies]
+image = "0.10.3"
+toml = "0.2.1"
