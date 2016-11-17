@@ -26,9 +26,15 @@ fn main() {
     let (width, height) = initial_image.dimensions();
     println!("Created image with dimensions {:?}x{:?}", width, height);
 
-    let triangle = drawing::random_triangle(width, height);
 
-    let image = drawing::draw_triangle(&initial_image, &triangle);
+    let mut image = initial_image;
+
+    for i in 0..50 {
+        let triangle = drawing::random_triangle(width, height);
+        let color = drawing::random_color(config.alpha);
+
+        image = drawing::draw_triangle(&image, &triangle, color);
+    }
 
     let _ = image.save("generated/triangle.png").unwrap();
 }

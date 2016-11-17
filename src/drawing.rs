@@ -5,6 +5,12 @@ use math;
 use image::Rgba;
 use rand::{thread_rng, Rng};
 
+pub fn random_color(alpha: u8) -> Rgba<u8> {
+    let mut rng = thread_rng();
+    let (r, g, b) = rng.gen::<(u8, u8, u8)>();
+    Rgba([r, g, b, alpha])
+}
+
 pub fn random_point(width: u32, height: u32) -> Point {
     let mut rng = thread_rng();
     let x = rng.gen_range(0, width) as i32;
@@ -21,7 +27,7 @@ pub fn random_triangle(width: u32, height: u32) -> Triangle {
     Triangle::new(p1, p2, p3)
 }
 
-pub fn draw_triangle(old_image: &Image, triangle: &Triangle) -> Image {
+pub fn draw_triangle(old_image: &Image, triangle: &Triangle, color: Rgba<u8>) -> Image {
     let mut image = old_image.clone();
 
     let (top_left, bottom_right) = get_bounding_box_for_triangle(&triangle);
@@ -30,7 +36,7 @@ pub fn draw_triangle(old_image: &Image, triangle: &Triangle) -> Image {
         for x in top_left.x..bottom_right.x {
             let point = Point::new(x, y);
             if point_is_in_triangle(&point, &triangle) {
-                image.put_pixel(x as u32, y as u32, Rgba([255u8, 255u8, 255u8, 255u8]));
+                image.put_pixel(x as u32, y as u32, color);
             }
         }
     }
