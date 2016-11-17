@@ -1,10 +1,10 @@
-use image_description::ImageDescription;
-
-use geo::{Point, LineString, Polygon};
-use geo::contains::Contains;
 use geo::boundingbox::BoundingBox;
+use geo::contains::Contains;
+use geo::{Point, LineString, Polygon};
 use image::{ImageBuffer, Rgba, Pixel};
 use rand::{thread_rng, Rng};
+
+use image_description::ImageDescription;
 
 type Color = Rgba<u8>;
 type Image = ImageBuffer<Color, Vec<u8>>;

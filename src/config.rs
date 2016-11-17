@@ -1,8 +1,8 @@
-use std::path;
+use std::collections::BTreeMap;
+use std::error::Error;
 use std::fs;
 use std::io::Read;
-use std::error::Error;
-use std::collections::BTreeMap;
+use std::path;
 
 use toml;
 
