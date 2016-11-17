@@ -1,13 +1,12 @@
 #![feature(field_init_shorthand)]
 
+extern crate geo;
 extern crate image;
 extern crate toml;
 extern crate rand;
 
 mod config;
 mod drawing;
-mod math;
-mod shapes;
 
 use config::Config;
 
@@ -26,14 +25,13 @@ fn main() {
     let (width, height) = initial_image.dimensions();
     println!("Created image with dimensions {:?}x{:?}", width, height);
 
-
     let mut image = initial_image;
 
-    for i in 0..50 {
+    for _ in 0..50 {
         let triangle = drawing::random_triangle(width, height);
         let color = drawing::random_color(config.alpha);
 
-        image = drawing::draw_triangle(&image, &triangle, color);
+        image = drawing::draw_polygon(&image, &triangle, color);
     }
 
     let _ = image.save("generated/triangle.png").unwrap();

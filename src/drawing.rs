@@ -1,8 +1,9 @@
 use super::Image;
-use shapes::{Point, Triangle};
-use math;
 
-use image::Rgba;
+use geo::{Point, LineString, Polygon};
+use geo::contains::Contains;
+use geo::boundingbox::BoundingBox;
+use image::{Rgba, Pixel};
 use rand::{thread_rng, Rng};
 
 pub fn random_color(alpha: u8) -> Rgba<u8> {
@@ -11,58 +12,47 @@ pub fn random_color(alpha: u8) -> Rgba<u8> {
     Rgba([r, g, b, alpha])
 }
 
-pub fn random_point(width: u32, height: u32) -> Point {
+pub fn random_point(width: u32, height: u32) -> Point<f32> {
     let mut rng = thread_rng();
-    let x = rng.gen_range(0, width) as i32;
-    let y = rng.gen_range(0, height) as i32;
+    let x = rng.gen_range(0, width) as f32;
+    let y = rng.gen_range(0, height) as f32;
 
     Point::new(x, y)
 }
 
-pub fn random_triangle(width: u32, height: u32) -> Triangle {
+pub fn random_triangle(width: u32, height: u32) -> Polygon<f32> {
     let p1 = random_point(width, height);
     let p2 = random_point(width, height);
     let p3 = random_point(width, height);
 
-    Triangle::new(p1, p2, p3)
+    polygon_from_points(vec![p1, p2, p3, p1])
 }
 
-pub fn draw_triangle(old_image: &Image, triangle: &Triangle, color: Rgba<u8>) -> Image {
+pub fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
+    let line_string = LineString(points);
+    let exterior = vec![];
+    Polygon::new(line_string.clone(), exterior.clone())
+}
+
+pub fn draw_polygon(old_image: &Image, polygon: &Polygon<f32>, color: Rgba<u8>) -> Image {
     let mut image = old_image.clone();
 
-    let (top_left, bottom_right) = get_bounding_box_for_triangle(&triangle);
+    let bounding_box = polygon.bbox().expect("Could not construct bounding box for polygon");
+    let xmin = bounding_box.xmin as u32;
+    let ymin = bounding_box.ymin as u32;
+    let xmax = bounding_box.xmax as u32;
+    let ymax = bounding_box.ymax as u32;
 
-    for y in top_left.y..bottom_right.y {
-        for x in top_left.x..bottom_right.x {
-            let point = Point::new(x, y);
-            if point_is_in_triangle(&point, &triangle) {
-                image.put_pixel(x as u32, y as u32, color);
+    for y in ymin..ymax {
+        for x in xmin..xmax {
+            let point = Point::new(x as f32, y as f32);
+            if polygon.contains(&point) {
+                let mut old_color = image.get_pixel(x, y).clone();
+                old_color.blend(&color);
+                image.put_pixel(x, y, old_color);
             }
         }
     }
 
     image
-}
-
-fn get_bounding_box_for_triangle(triangle: &Triangle) -> (Point, Point) {
-    let min_x = math::min3(triangle.p0.x, triangle.p1.x, triangle.p2.x);
-    let min_y = math::min3(triangle.p0.y, triangle.p1.y, triangle.p2.y);
-    let max_x = math::max3(triangle.p0.x, triangle.p1.x, triangle.p2.x);
-    let max_y = math::max3(triangle.p0.y, triangle.p1.y, triangle.p2.y);
-
-    (Point::new(min_x, min_y), Point::new(max_x, max_y))
-}
-
-fn point_is_in_triangle(point: &Point, triangle: &Triangle) -> bool {
-    let p0 = &triangle.p0;
-    let p1 = &triangle.p1;
-    let p2 = &triangle.p2;
-    let pt = &point;
-
-    let a = -p1.y * p2.x + p0.y * (-p1.x + p2.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y;
-    let sign = if a < 0 {-1} else {1};
-    let s = (p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * pt.x + (p0.x - p2.x) * pt.y) * sign;
-    let t = (p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * pt.x + (p1.x - p0.x) * pt.y) * sign;
-
-    s > 0 && t > 0 && (s + t) < a * sign
 }

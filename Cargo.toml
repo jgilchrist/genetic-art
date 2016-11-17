@@ -7,3 +7,4 @@ authors = ["Jonny Gilchrist <jonnygilchrist@gmail.com>"]
 image = "0.10.3"
 toml = "0.2.1"
 rand = "0.3.14"
+geo = "0.3.1"
