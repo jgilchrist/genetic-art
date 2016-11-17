@@ -7,12 +7,11 @@ extern crate rand;
 
 mod config;
 mod drawing;
+mod image_description;
 
 use config::Config;
-
-use image::{ImageBuffer, Rgba};
-
-type Image = ImageBuffer<Rgba<u8>, Vec<u8>>;
+use drawing::ColoredPolygon;
+use image_description::ImageDescription;
 
 const CONFIG_FILE_PATH: &'static str = "Config.toml";
 
@@ -20,19 +19,18 @@ fn main() {
     let config = Config::from_config_file(CONFIG_FILE_PATH);
     println!("Config loaded: {:?}", config);
 
-    let initial_image = ImageBuffer::from_pixel(config.width, config.height, image::Rgba([0u8, 0u8, 0u8, 255u8]));
-
-    let (width, height) = initial_image.dimensions();
-    println!("Created image with dimensions {:?}x{:?}", width, height);
-
-    let mut image = initial_image;
+    let mut polygons: Vec<ColoredPolygon> = vec![];
 
     for _ in 0..50 {
-        let triangle = drawing::random_triangle(width, height);
-        let color = drawing::random_color(config.alpha);
-
-        image = drawing::draw_polygon(&image, &triangle, color);
+        polygons.push(drawing::random_colored_triangle(config.width, config.height, config.alpha));
     }
 
+    let image_desc = ImageDescription {
+        width: config.width,
+        height: config.height,
+        polygons: polygons
+    };
+
+    let image = drawing::draw_image(&image_desc);
     let _ = image.save("generated/triangle.png").unwrap();
 }

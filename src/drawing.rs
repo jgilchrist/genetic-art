@@ -1,18 +1,26 @@
-use super::Image;
+use image_description::ImageDescription;
 
 use geo::{Point, LineString, Polygon};
 use geo::contains::Contains;
 use geo::boundingbox::BoundingBox;
-use image::{Rgba, Pixel};
+use image::{ImageBuffer, Rgba, Pixel};
 use rand::{thread_rng, Rng};
 
-pub fn random_color(alpha: u8) -> Rgba<u8> {
+type Color = Rgba<u8>;
+type Image = ImageBuffer<Color, Vec<u8>>;
+
+pub struct ColoredPolygon {
+    pub polygon: Polygon<f32>,
+    pub color: Color,
+}
+
+fn random_color(alpha: u8) -> Color {
     let mut rng = thread_rng();
     let (r, g, b) = rng.gen::<(u8, u8, u8)>();
     Rgba([r, g, b, alpha])
 }
 
-pub fn random_point(width: u32, height: u32) -> Point<f32> {
+fn random_point(width: u32, height: u32) -> Point<f32> {
     let mut rng = thread_rng();
     let x = rng.gen_range(0, width) as f32;
     let y = rng.gen_range(0, height) as f32;
@@ -20,7 +28,7 @@ pub fn random_point(width: u32, height: u32) -> Point<f32> {
     Point::new(x, y)
 }
 
-pub fn random_triangle(width: u32, height: u32) -> Polygon<f32> {
+fn random_triangle(width: u32, height: u32) -> Polygon<f32> {
     let p1 = random_point(width, height);
     let p2 = random_point(width, height);
     let p3 = random_point(width, height);
@@ -28,15 +36,30 @@ pub fn random_triangle(width: u32, height: u32) -> Polygon<f32> {
     polygon_from_points(vec![p1, p2, p3, p1])
 }
 
-pub fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
+pub fn random_colored_triangle(width: u32, height: u32, alpha: u8) -> ColoredPolygon {
+    ColoredPolygon {
+        polygon: random_triangle(width, height),
+        color: random_color(alpha),
+    }
+}
+
+fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
     let line_string = LineString(points);
     let exterior = vec![];
     Polygon::new(line_string.clone(), exterior.clone())
 }
 
-pub fn draw_polygon(old_image: &Image, polygon: &Polygon<f32>, color: Rgba<u8>) -> Image {
-    let mut image = old_image.clone();
+pub fn draw_image(description: &ImageDescription) -> Image {
+    let mut image = ImageBuffer::from_pixel(description.width, description.height, Rgba([0u8, 0u8, 0u8, 255u8]));
 
+    for polygon in &description.polygons {
+        draw_polygon(&mut image, &polygon.polygon, polygon.color);
+    }
+
+    image
+}
+
+fn draw_polygon(image: &mut Image, polygon: &Polygon<f32>, color: Color) {
     let bounding_box = polygon.bbox().expect("Could not construct bounding box for polygon");
     let xmin = bounding_box.xmin as u32;
     let ymin = bounding_box.ymin as u32;
@@ -53,6 +76,4 @@ pub fn draw_polygon(old_image: &Image, polygon: &Polygon<f32>, color: Rgba<u8>) 
             }
         }
     }
-
-    image
 }
