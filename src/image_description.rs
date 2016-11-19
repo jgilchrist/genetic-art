@@ -1,5 +1,8 @@
+use std::cmp;
+
 use rand::{self, Rng};
 use geo::Point;
+use image::Pixel;
 
 use config::Config;
 use drawing::{self, random_colored_triangle, ColoredPolygon};
@@ -77,12 +80,15 @@ pub fn alter_polygon_color(image: &mut ImageDescription, config: &Config) {
     let random_index = rand::thread_rng().gen_range(0, image.polygons.len());
     let random_polygon = image.polygons.remove(random_index);
 
-    let exterior = random_polygon
-        .polygon
-        .exterior.0.clone();
-    let new_polygon = drawing::polygon_from_points(exterior);
+    let new_color = random_polygon.color.map(|v| {
+        let old_value = v as i32;
+        let mut new_value = old_value + rand::thread_rng().gen_range(-30, 30);
+        new_value = cmp::max(new_value, 0);
+        new_value = cmp::min(new_value, 255);
+        new_value as u8
+    });
 
-    let new_color = drawing::random_color(config.alpha);
+    let new_polygon = drawing::polygon_from_points(random_polygon.polygon.exterior.0);
 
     let new_colored_polygon = ColoredPolygon {
         polygon: new_polygon,
