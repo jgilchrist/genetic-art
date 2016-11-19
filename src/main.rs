@@ -33,23 +33,30 @@ fn main() {
     let mut polygons: Vec<ColoredPolygon> = vec![];
     polygons.push(drawing::random_colored_triangle(config.width, config.height, config.alpha));
 
-    let image_desc = ImageDescription {
+    let initial_image_desc = ImageDescription {
         width: config.width,
         height: config.height,
         polygons: polygons
     };
 
-    let image = drawing::draw_image(&image_desc);
-    image.save("generated/before.png").unwrap();
+    let mut image_desc = initial_image_desc;
+    let mut last_error = genetic::fitness(&input_image, &image_desc);
 
-    let fitness = genetic::fitness(&input_image, &image_desc);
+    for i in 0..100000 {
+        let new_candidate = mutate(&image_desc, &config);
+        let new_error = genetic::fitness(&input_image, &new_candidate);
 
-    let new_image_desc = mutate(&image_desc, &config);
+        if new_error < last_error {
+            println!("{}: Decreased error from {} to {}", i, last_error, new_error);
 
-    let new_fitness = genetic::fitness(&input_image, &new_image_desc);
+            image_desc = new_candidate;
+            last_error = new_error;
 
-    println!("{}\n{}", fitness, new_fitness);
+            let img = drawing::draw_image(&image_desc);
+            img.save(format!("generated/{}.png", i)).unwrap();
+        }
+    }
 
-    let new_image = drawing::draw_image(&new_image_desc);
-    new_image.save("generated/after.png").unwrap();
+    let final_image = drawing::draw_image(&image_desc);
+    final_image.save("generated/after.png").unwrap();
 }

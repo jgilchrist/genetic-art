@@ -70,11 +70,16 @@ fn draw_polygon(image: &mut Image, polygon: &Polygon<f32>, color: Color) {
     for y in ymin..ymax {
         for x in xmin..xmax {
             let point = Point::new(x as f32, y as f32);
-            if polygon.contains(&point) {
+            if polygon.contains(&point) && point_in_image(image, &point) {
                 let mut old_color = *image.get_pixel(x, y);
                 old_color.blend(&color);
                 image.put_pixel(x, y, old_color);
             }
         }
     }
+}
+
+fn point_in_image(image: &Image, point: &Point<f32>) -> bool {
+    let (width, height) = image.dimensions();
+    point.x() >= 0.0 && point.y() >= 0.0 && point.x() < width as f32 && point.y() < height as f32
 }
