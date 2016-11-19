@@ -1,3 +1,6 @@
+#![feature(plugin)]
+#![plugin(clippy)]
+
 #![feature(field_init_shorthand)]
 
 extern crate geo;
@@ -32,5 +35,5 @@ fn main() {
     };
 
     let image = drawing::draw_image(&image_desc);
-    let _ = image.save("generated/triangle.png").unwrap();
+    image.save("generated/triangle.png").unwrap();
 }

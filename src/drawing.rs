@@ -70,7 +70,7 @@ fn draw_polygon(image: &mut Image, polygon: &Polygon<f32>, color: Color) {
         for x in xmin..xmax {
             let point = Point::new(x as f32, y as f32);
             if polygon.contains(&point) {
-                let mut old_color = image.get_pixel(x, y).clone();
+                let mut old_color = *image.get_pixel(x, y);
                 old_color.blend(&color);
                 image.put_pixel(x, y, old_color);
             }
