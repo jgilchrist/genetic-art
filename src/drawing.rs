@@ -6,8 +6,8 @@ use rand::{thread_rng, Rng};
 
 use image_description::ImageDescription;
 
-type Color = Rgba<u8>;
-type Image = ImageBuffer<Color, Vec<u8>>;
+pub type Color = Rgba<u8>;
+pub type Image = ImageBuffer<Color, Vec<u8>>;
 
 #[derive(Clone)]
 pub struct ColoredPolygon {
