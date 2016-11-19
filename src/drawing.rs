@@ -9,12 +9,13 @@ use image_description::ImageDescription;
 type Color = Rgba<u8>;
 type Image = ImageBuffer<Color, Vec<u8>>;
 
+#[derive(Clone)]
 pub struct ColoredPolygon {
     pub polygon: Polygon<f32>,
     pub color: Color,
 }
 
-fn random_color(alpha: u8) -> Color {
+pub fn random_color(alpha: u8) -> Color {
     let mut rng = thread_rng();
     let (r, g, b) = rng.gen::<(u8, u8, u8)>();
     Rgba([r, g, b, alpha])
@@ -43,7 +44,7 @@ pub fn random_colored_triangle(width: u32, height: u32, alpha: u8) -> ColoredPol
     }
 }
 
-fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
+pub fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
     let line_string = LineString(points);
     let exterior = vec![];
     Polygon::new(line_string.clone(), exterior.clone())

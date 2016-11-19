@@ -14,7 +14,7 @@ mod image_description;
 
 use config::Config;
 use drawing::ColoredPolygon;
-use image_description::ImageDescription;
+use image_description::{ImageDescription, mutate};
 
 const CONFIG_FILE_PATH: &'static str = "Config.toml";
 
@@ -23,10 +23,7 @@ fn main() {
     println!("Config loaded: {:?}", config);
 
     let mut polygons: Vec<ColoredPolygon> = vec![];
-
-    for _ in 0..50 {
-        polygons.push(drawing::random_colored_triangle(config.width, config.height, config.alpha));
-    }
+    polygons.push(drawing::random_colored_triangle(config.width, config.height, config.alpha));
 
     let image_desc = ImageDescription {
         width: config.width,
@@ -35,5 +32,10 @@ fn main() {
     };
 
     let image = drawing::draw_image(&image_desc);
-    image.save("generated/triangle.png").unwrap();
+    image.save("generated/before.png").unwrap();
+
+    let new_image_desc = mutate(&image_desc, &config);
+
+    let new_image = drawing::draw_image(&new_image_desc);
+    new_image.save("generated/after.png").unwrap();
 }
