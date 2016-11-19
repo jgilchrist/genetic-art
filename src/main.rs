@@ -42,12 +42,13 @@ fn main() {
     let mut image_desc = initial_image_desc;
     let mut last_error = genetic::fitness(&input_image, &image_desc);
 
-    for i in 0..100000 {
+    let mut i = 0;
+    loop {
         let new_candidate = mutate(&image_desc, &config);
         let new_error = genetic::fitness(&input_image, &new_candidate);
 
         if new_error < last_error {
-            println!("{}: Decreased error from {} to {}", i, last_error, new_error);
+            println!("{}: Decreased error from {} to {} = {}", i, last_error, new_error, last_error - new_error);
 
             image_desc = new_candidate;
             last_error = new_error;
@@ -55,6 +56,8 @@ fn main() {
             let img = drawing::draw_image(&image_desc);
             img.save(format!("generated/{}.png", i)).unwrap();
         }
+
+        i += 1
     }
 
     let final_image = drawing::draw_image(&image_desc);
