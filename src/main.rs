@@ -10,11 +10,10 @@ extern crate rand;
 
 mod config;
 mod drawing;
+mod genetic;
 mod image_description;
 
 use std::env;
-
-use image::GenericImage;
 
 use config::Config;
 use drawing::ColoredPolygon;
@@ -24,7 +23,7 @@ const CONFIG_FILE_PATH: &'static str = "Config.toml";
 
 fn main() {
     let image_file = env::args().nth(1).expect("No image file was provided");
-    let input_image = image::open(image_file).unwrap();
+    let input_image = image::open(image_file).unwrap().to_rgba();
     let (width, height) = input_image.dimensions();
     println!("Image loaded: {}x{}", width, height);
 
@@ -43,7 +42,13 @@ fn main() {
     let image = drawing::draw_image(&image_desc);
     image.save("generated/before.png").unwrap();
 
+    let fitness = genetic::fitness(&input_image, &image_desc);
+
     let new_image_desc = mutate(&image_desc, &config);
+
+    let new_fitness = genetic::fitness(&input_image, &new_image_desc);
+
+    println!("{}\n{}", fitness, new_fitness);
 
     let new_image = drawing::draw_image(&new_image_desc);
     new_image.save("generated/after.png").unwrap();
