@@ -10,8 +10,9 @@ use toml;
 pub struct Config {
     pub width: u32,
     pub height: u32,
-    pub population_size: u32,
     pub alpha: u8,
+
+    pub population_size: u32,
 
     pub add_polygon_chance: f32,
     pub remove_polygon_chance: f32,
@@ -22,7 +23,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_config_file<T>(as_path: T) -> Config where T: AsRef<path::Path> {
+    pub fn from_config_file<T>(as_path: T, width: u32, height: u32) -> Config where T: AsRef<path::Path> {
         let path = as_path.as_ref();
         let mut file = match fs::File::open(&path) {
             Err(why) => panic!("Couldn't open the configuration file ({:?}): {}", path, why.description()),
@@ -36,8 +37,6 @@ impl Config {
 
         let toml_value = toml::Parser::new(&file_contents).parse().unwrap();
 
-        let width = Config::get_int(&toml_value, "width");
-        let height = Config::get_int(&toml_value, "height");
         let population_size = Config::get_int(&toml_value, "population_size");
         let alpha = Config::get_int(&toml_value, "alpha") as u8;
 
@@ -51,8 +50,9 @@ impl Config {
         Config {
             width,
             height,
-            population_size,
             alpha,
+
+            population_size,
 
             add_polygon_chance,
             remove_polygon_chance,

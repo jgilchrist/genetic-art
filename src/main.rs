@@ -12,6 +12,10 @@ mod config;
 mod drawing;
 mod image_description;
 
+use std::env;
+
+use image::GenericImage;
+
 use config::Config;
 use drawing::ColoredPolygon;
 use image_description::{ImageDescription, mutate};
@@ -19,7 +23,12 @@ use image_description::{ImageDescription, mutate};
 const CONFIG_FILE_PATH: &'static str = "Config.toml";
 
 fn main() {
-    let config = Config::from_config_file(CONFIG_FILE_PATH);
+    let image_file = env::args().nth(1).expect("No image file was provided");
+    let input_image = image::open(image_file).unwrap();
+    let (width, height) = input_image.dimensions();
+    println!("Image loaded: {}x{}", width, height);
+
+    let config = Config::from_config_file(CONFIG_FILE_PATH, width, height);
     println!("Config loaded: {:?}", config);
 
     let mut polygons: Vec<ColoredPolygon> = vec![];
