@@ -33,7 +33,7 @@ fn should_mutate(chance: f32) -> bool {
 pub fn add_polygon(image: &mut ImageDescription, config: &Config) {
     if !should_mutate(config.add_polygon_chance) { return; }
 
-    let new_polygon = random_colored_triangle(config.width, config.height, config.alpha);
+    let new_polygon = random_colored_triangle(image.width, image.height);
     image.polygons.push(new_polygon);
 }
 

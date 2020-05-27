@@ -1,9 +1,0 @@
-population_size=10
-alpha=100
-
-add_polygon_chance=0.30
-remove_polygon_chance=0.05
-move_polygon_chance=0.40
-alter_polygon_color_chance=0.50
-
-max_move_amount=30.0

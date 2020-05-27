@@ -1,6 +1,6 @@
+extern crate clap;
 extern crate geo;
 extern crate image;
-extern crate toml;
 extern crate rand;
 
 mod config;
@@ -8,29 +8,23 @@ mod drawing;
 mod genetic;
 mod image_description;
 
-use std::env;
-
+use clap::Clap;
 use config::Config;
 use drawing::ColoredPolygon;
 use image_description::{ImageDescription, mutate};
 
-const CONFIG_FILE_PATH: &str = "Config.toml";
-
 fn main() {
-    let image_file = env::args().nth(1).expect("No image file was provided");
-    let input_image = image::open(image_file).unwrap().to_rgba();
+    let config: Config = Config::parse();
+    let input_image = image::open(&config.image_file).unwrap().to_rgba();
     let (width, height) = input_image.dimensions();
     println!("Image loaded: {}x{}", width, height);
 
-    let config = Config::from_config_file(CONFIG_FILE_PATH, width, height);
-    println!("Config loaded: {:?}", config);
-
     let mut polygons: Vec<ColoredPolygon> = vec![];
-    polygons.push(drawing::random_colored_triangle(config.width, config.height, config.alpha));
+    polygons.push(drawing::random_colored_triangle(width, height));
 
     let initial_image_desc = ImageDescription {
-        width: config.width,
-        height: config.height,
+        width,
+        height,
         polygons,
     };
 

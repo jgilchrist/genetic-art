@@ -15,10 +15,10 @@ pub struct ColoredPolygon {
     pub color: Color,
 }
 
-pub fn random_color(alpha: u8) -> Color {
+pub fn random_color() -> Color {
     let mut rng = thread_rng();
     let (r, g, b) = rng.gen::<(u8, u8, u8)>();
-    Rgba([r, g, b, alpha])
+    Rgba([r, g, b, 1])
 }
 
 fn random_point(width: u32, height: u32) -> Point<f32> {
@@ -37,10 +37,10 @@ fn random_triangle(width: u32, height: u32) -> Polygon<f32> {
     polygon_from_points(vec![p1, p2, p3, p1])
 }
 
-pub fn random_colored_triangle(width: u32, height: u32, alpha: u8) -> ColoredPolygon {
+pub fn random_colored_triangle(width: u32, height: u32) -> ColoredPolygon {
     ColoredPolygon {
         polygon: random_triangle(width, height),
-        color: random_color(alpha),
+        color: random_color(),
     }
 }
 
