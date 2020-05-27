@@ -1,8 +1,3 @@
-#![feature(plugin)]
-#![plugin(clippy)]
-
-#![feature(field_init_shorthand)]
-
 extern crate geo;
 extern crate image;
 extern crate toml;
