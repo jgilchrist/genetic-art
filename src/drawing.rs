@@ -1,85 +1,133 @@
-use geo::boundingbox::BoundingBox;
-use geo::contains::Contains;
-use geo::{Point, LineString, Polygon};
-use image::{ImageBuffer, Rgba, Pixel};
+use config::Config;
+use image::{ImageBuffer, Rgb, Pixel};
 use rand::{thread_rng, Rng};
+use std::cmp;
 
-use image_description::ImageDescription;
-
-pub type Color = Rgba<u8>;
+pub type Color = Rgb<u8>;
 pub type Image = ImageBuffer<Color, Vec<u8>>;
 
-#[derive(Clone)]
-pub struct ColoredPolygon {
-    pub polygon: Polygon<f32>,
+#[derive(Clone, Copy, Debug)]
+pub struct Point {
+    pub x: i64,
+    pub y: i64
+}
+
+#[derive(Clone, Debug)]
+pub struct Circle {
+    pub location: Point,
+    pub radius: f64,
+}
+
+#[derive(Clone, Debug)]
+pub struct ColoredCircle {
+    pub circle: Circle,
     pub color: Color,
+}
+
+#[derive(Clone, Debug)]
+pub struct ImageDescription {
+    pub width: u64,
+    pub height: u64,
+    pub items: Vec<ColoredCircle>
+}
+
+pub fn mutate(old_image: &ImageDescription, config: &Config) -> ImageDescription {
+    let mut image = old_image.clone();
+
+    add_circle(&mut image, config);
+    remove_circle(&mut image, config);
+    move_circle(&mut image, config);
+    alter_circle_color(&mut image, config);
+
+    image
+}
+
+#[inline]
+fn should_mutate(chance: f64) -> bool {
+    let r: f64 = rand::thread_rng().gen();
+    return r < chance;
+}
+
+pub fn add_circle(image: &mut ImageDescription, config: &Config) {
+    if !should_mutate(config.add_chance) { return; }
+
+    image.items.push(
+        random_colored_circle(image.width, image.height, config.max_radius)
+    );
+}
+
+pub fn remove_circle(image: &mut ImageDescription, config: &Config) {
+    if !should_mutate(config.remove_chance) { return; }
+    if image.items.is_empty() { return; }
+
+    let random_index = rand::thread_rng().gen_range(0, image.items.len());
+    image.items.remove(random_index);
+}
+
+pub fn move_circle(image: &mut ImageDescription, config: &Config) {
+    if !should_mutate(config.move_chance) { return; }
+    if image.items.is_empty() { return; }
+
+    let x_amount = rand::thread_rng().gen_range(-config.max_move_amount, config.max_move_amount) as i64;
+    let y_amount = rand::thread_rng().gen_range(-config.max_move_amount, config.max_move_amount) as i64;
+
+    let random_index = rand::thread_rng().gen_range(0, image.items.len());
+    let random_circle = image.items.remove(random_index);
+
+    let new_location = Point { x: random_circle.circle.location.x as i64 + x_amount, y: random_circle.circle.location.y as i64 + y_amount };
+
+    let new_colored_circle = ColoredCircle {
+        circle: Circle { location: new_location, radius: random_circle.circle.radius },
+        color: random_circle.color,
+    };
+
+    image.items.push(new_colored_circle);
+}
+
+pub fn alter_circle_color(image: &mut ImageDescription, config: &Config) {
+    if !should_mutate(config.alter_color_chance) { return; }
+    if image.items.is_empty() { return; }
+
+    let random_index = rand::thread_rng().gen_range(0, image.items.len());
+    let random_circle = image.items.remove(random_index);
+
+    let new_color = random_circle.color.map(|v| {
+        let old_value = v as i64;
+        let mut new_value = old_value + rand::thread_rng().gen_range(-30, 30);
+        new_value = cmp::max(new_value, 0);
+        new_value = cmp::min(new_value, 255);
+        new_value as u8
+    });
+
+    let new_colored_polygon = ColoredCircle {
+        circle: random_circle.circle,
+        color: new_color,
+    };
+
+    image.items.push(new_colored_polygon);
 }
 
 pub fn random_color() -> Color {
     let mut rng = thread_rng();
     let (r, g, b) = rng.gen::<(u8, u8, u8)>();
-    Rgba([r, g, b, 1])
+    Rgb([r, g, b])
 }
 
-fn random_point(width: u32, height: u32) -> Point<f32> {
+fn random_circle(width: u64, height: u64, radius_limit: u64) -> Circle {
     let mut rng = thread_rng();
-    let x = rng.gen_range(0, width) as f32;
-    let y = rng.gen_range(0, height) as f32;
+    let x = rng.gen_range(0, width) as i64;
+    let y = rng.gen_range(0, height) as i64;
 
-    Point::new(x, y)
+    let location = Point { x, y };
+
+    let radius = rng.gen_range(0, radius_limit) as f64;
+
+    Circle { location, radius }
 }
 
-fn random_triangle(width: u32, height: u32) -> Polygon<f32> {
-    let p1 = random_point(width, height);
-    let p2 = random_point(width, height);
-    let p3 = random_point(width, height);
-
-    polygon_from_points(vec![p1, p2, p3, p1])
-}
-
-pub fn random_colored_triangle(width: u32, height: u32) -> ColoredPolygon {
-    ColoredPolygon {
-        polygon: random_triangle(width, height),
+pub fn random_colored_circle(width: u64, height: u64, radius_limit: u64) -> ColoredCircle {
+    ColoredCircle {
+        circle: random_circle(width, height, radius_limit),
         color: random_color(),
     }
-}
-
-pub fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
-    let line_string = LineString(points);
-    let exterior = vec![];
-    Polygon::new(line_string, exterior)
-}
-
-pub fn draw_image(description: &ImageDescription) -> Image {
-    let mut image = ImageBuffer::from_pixel(description.width, description.height, Rgba([0u8, 0u8, 0u8, 255u8]));
-
-    for polygon in &description.polygons {
-        draw_polygon(&mut image, &polygon.polygon, polygon.color);
-    }
-
-    image
-}
-
-fn draw_polygon(image: &mut Image, polygon: &Polygon<f32>, color: Color) {
-    let bounding_box = polygon.bbox().expect("Could not construct bounding box for polygon");
-    let xmin = bounding_box.xmin as u32;
-    let ymin = bounding_box.ymin as u32;
-    let xmax = bounding_box.xmax as u32;
-    let ymax = bounding_box.ymax as u32;
-
-    for y in ymin..ymax {
-        for x in xmin..xmax {
-            let point = Point::new(x as f32, y as f32);
-            if polygon.contains(&point) && point_in_image(image, point) {
-                let mut old_color = *image.get_pixel(x, y);
-                old_color.blend(&color);
-                image.put_pixel(x, y, old_color);
-            }
-        }
-    }
-}
-
-fn point_in_image(image: &Image, point: Point<f32>) -> bool {
-    let (width, height) = image.dimensions();
-    point.x() >= 0.0 && point.y() >= 0.0 && point.x() < width as f32 && point.y() < height as f32
 }

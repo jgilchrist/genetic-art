@@ -6,17 +6,23 @@ pub struct Config {
     pub image_file: String,
 
     #[clap(long)]
-    pub population_size: u32,
+    pub generation_size: u64,
 
     #[clap(long)]
-    pub add_polygon_chance: f32,
-    #[clap(long)]
-    pub remove_polygon_chance: f32,
-    #[clap(long)]
-    pub move_polygon_chance: f32,
-    #[clap(long)]
-    pub alter_polygon_color_chance: f32,
+    pub selection_size: u64,
 
     #[clap(long)]
-    pub max_move_amount: f32,
+    pub add_chance: f64,
+    #[clap(long)]
+    pub remove_chance: f64,
+    #[clap(long)]
+    pub move_chance: f64,
+    #[clap(long)]
+    pub alter_color_chance: f64,
+
+    #[clap(long)]
+    pub max_move_amount: i64,
+
+    #[clap(long)]
+    pub max_radius: u64,
 }

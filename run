@@ -1,0 +1,10 @@
+cargo run --release -- \
+    images/monet.jpg \
+    --selection-size 10 \
+    --generation-size 100 \
+    --add-chance 1.0 \
+    --remove-chance 0.1 \
+    --move-chance 1.0 \
+    --alter-color-chance 1.0 \
+    --max-move-amount 50 \
+    --max-radius 500
