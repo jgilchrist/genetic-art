@@ -27,7 +27,8 @@ pub fn mutate(old_image: &ImageDescription, config: &Config) -> ImageDescription
 
 #[inline]
 fn should_mutate(chance: f32) -> bool {
-    rand::thread_rng().next_f32() < chance
+    let r: f32 = rand::thread_rng().gen();
+    return r < chance;
 }
 
 pub fn add_polygon(image: &mut ImageDescription, config: &Config) {
