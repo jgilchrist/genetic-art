@@ -14,7 +14,7 @@ use config::Config;
 use drawing::ColoredPolygon;
 use image_description::{ImageDescription, mutate};
 
-const CONFIG_FILE_PATH: &'static str = "Config.toml";
+const CONFIG_FILE_PATH: &str = "Config.toml";
 
 fn main() {
     let image_file = env::args().nth(1).expect("No image file was provided");
@@ -31,7 +31,7 @@ fn main() {
     let initial_image_desc = ImageDescription {
         width: config.width,
         height: config.height,
-        polygons: polygons
+        polygons,
     };
 
     let mut image_desc = initial_image_desc;

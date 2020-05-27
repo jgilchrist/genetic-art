@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::error::Error;
 use std::fs;
 use std::io::Read;
 use std::path;
@@ -26,13 +25,13 @@ impl Config {
     pub fn from_config_file<T>(as_path: T, width: u32, height: u32) -> Config where T: AsRef<path::Path> {
         let path = as_path.as_ref();
         let mut file = match fs::File::open(&path) {
-            Err(why) => panic!("Couldn't open the configuration file ({:?}): {}", path, why.description()),
+            Err(why) => panic!("Couldn't open the configuration file ({:?}): {}", path, why.to_string()),
             Ok(file) => file,
         };
 
         let mut file_contents = String::new();
         if let Err(why) = file.read_to_string(&mut file_contents) {
-            panic!("Couldn't read from the configuration file: {}", why.description());
+            panic!("Couldn't read from the configuration file: {}", why.to_string());
         };
 
         let toml_value = toml::Parser::new(&file_contents).parse().unwrap();
@@ -65,17 +64,17 @@ impl Config {
 
     fn get_int(toml_value: &BTreeMap<String, toml::Value>, parameter: &'static str) -> u32 {
         toml_value.get(parameter)
-            .expect(&format!("{} configuration not specified", parameter))
+            .unwrap_or_else(|| panic!("{} configuration not specified", parameter))
             .as_integer()
-            .expect(&format!("{} configuration was incorrect", parameter))
+            .unwrap_or_else(|| panic!("{} configuration was incorrect", parameter))
             as u32
     }
 
     fn get_float(toml_value: &BTreeMap<String, toml::Value>, parameter: &'static str) -> f32 {
         toml_value.get(parameter)
-            .expect(&format!("{} configuration not specified", parameter))
+            .unwrap_or_else(|| panic!("{} configuration not specified", parameter))
             .as_float()
-            .expect(&format!("{} configuration was incorrect", parameter))
+            .unwrap_or_else(|| panic!("{} configuration was incorrect", parameter))
             as f32
     }
 }

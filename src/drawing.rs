@@ -47,7 +47,7 @@ pub fn random_colored_triangle(width: u32, height: u32, alpha: u8) -> ColoredPol
 pub fn polygon_from_points(points: Vec<Point<f32>>) -> Polygon<f32> {
     let line_string = LineString(points);
     let exterior = vec![];
-    Polygon::new(line_string.clone(), exterior.clone())
+    Polygon::new(line_string, exterior)
 }
 
 pub fn draw_image(description: &ImageDescription) -> Image {
@@ -70,7 +70,7 @@ fn draw_polygon(image: &mut Image, polygon: &Polygon<f32>, color: Color) {
     for y in ymin..ymax {
         for x in xmin..xmax {
             let point = Point::new(x as f32, y as f32);
-            if polygon.contains(&point) && point_in_image(image, &point) {
+            if polygon.contains(&point) && point_in_image(image, point) {
                 let mut old_color = *image.get_pixel(x, y);
                 old_color.blend(&color);
                 image.put_pixel(x, y, old_color);
@@ -79,7 +79,7 @@ fn draw_polygon(image: &mut Image, polygon: &Polygon<f32>, color: Color) {
     }
 }
 
-fn point_in_image(image: &Image, point: &Point<f32>) -> bool {
+fn point_in_image(image: &Image, point: Point<f32>) -> bool {
     let (width, height) = image.dimensions();
     point.x() >= 0.0 && point.y() >= 0.0 && point.x() < width as f32 && point.y() < height as f32
 }
